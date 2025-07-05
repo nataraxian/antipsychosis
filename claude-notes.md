@@ -12,16 +12,27 @@ Building a defensive security tool to detect manipulative/sycophantic AI respons
   - Real-time commentary on manipulation detection
   - Focus on sycophantic and manipulative response patterns
 
+## MVP Plan
+1. **Chat Interface**: Two-column layout with ChatGPT conversation on left, analysis on right
+2. **OpenAI Integration**: Direct API calls to ChatGPT with user's API key
+3. **Analysis Engine**: Real-time detection of manipulation patterns:
+   - Excessive flattery/agreement
+   - Emotional manipulation tactics
+   - Overconfidence in uncertain topics
+   - Dismissing user concerns
+   - False sense of urgency
+4. **Authentication**: Clerk for user management
+5. **Data Storage**: Convex for conversation history and analysis logs
+
 ## Progress Status
-- ✅ **Step 1: Requirements Gathering** - completed (pending interface clarification)
-- 🔄 **Step 2: Setup** - updating project name and removing template instructions
-- ⏳ Step 3: Implementation - pending
+- ✅ **Step 1: Requirements Gathering** - completed (real-time chat interface)
+- ✅ **Step 2: Setup** - completed (project renamed, template removed)
+- 🔄 **Step 3: Implementation** - in progress
 
 ## Commits Made During Session
-(none yet - will track initialization commits here)
+- 84656b1: init: setup antipsychosis app - ChatGPT manipulation detector
 
 ## Next Steps
-- Clarify interface type (real-time chat vs analysis tool)
-- Update package.json with "antipsychosis" name
-- Remove template instructions from CLAUDE.md
-- Plan and implement MVP
+- Remove demo content and create chat interface
+- Implement ChatGPT API integration
+- Create manipulation analysis system

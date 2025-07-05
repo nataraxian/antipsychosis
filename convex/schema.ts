@@ -8,4 +8,26 @@ export default defineSchema({
     clerkId: v.string(),
     name: v.string(),
   }).index("by_clerkId", ["clerkId"]),
+  
+  conversations: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    messages: v.array(v.object({
+      role: v.union(v.literal("user"), v.literal("assistant")),
+      content: v.string(),
+      timestamp: v.number(),
+    })),
+    analysis: v.array(v.object({
+      messageIndex: v.number(),
+      manipulationScore: v.number(),
+      patterns: v.array(v.string()),
+      explanation: v.string(),
+      timestamp: v.number(),
+    })),
+  }).index("by_userId", ["userId"]),
+  
+  apiKeys: defineTable({
+    userId: v.id("users"),
+    openaiApiKey: v.string(),
+  }).index("by_userId", ["userId"]),
 });
