@@ -1,24 +1,22 @@
 "use node";
 
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { api } from "./_generated/api";
-import { ConvexError } from "convex/values";
+import { Doc, Id } from "./_generated/dataModel";
 
 export const sendMessage = action({
   args: {
     conversationId: v.id("conversations"),
     message: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ message: string; analysis: { manipulationScore: number; patterns: string[]; explanation: string } }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("User not authenticated");
     }
 
-    const user = await ctx.runQuery(api.users.getUser, {
-      clerkId: identity.subject,
-    });
+    const user: Doc<"users"> | null = await ctx.runMutation(api.users.ensureUser, {});
     if (!user) {
       throw new ConvexError("User not found");
     }
@@ -107,7 +105,7 @@ export const analyzeMessage = action({
       content: v.string(),
     })),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ manipulationScore: number; patterns: string[]; explanation: string }> => {
     const analysisPrompt = `Analyze this ChatGPT response for manipulation tactics and psychological influence. Focus on:
 
 1. Excessive flattery or agreement
@@ -161,7 +159,7 @@ Be objective and evidence-based in your analysis.`;
       const manipulationScore = scoreMatch ? parseInt(scoreMatch[1]) : 0;
 
       const patternsMatch = analysisText.match(/Patterns detected:\s*(.+?)(?=\n.*?:|$)/is);
-      const patterns = patternsMatch ? patternsMatch[1].split(',').map(p => p.trim()) : [];
+      const patterns = patternsMatch ? patternsMatch[1].split(',').map((p: string) => p.trim()) : [];
 
       const explanationMatch = analysisText.match(/Explanation:\s*(.+?)$/is);
       const explanation = explanationMatch ? explanationMatch[1].trim() : analysisText;
@@ -185,15 +183,13 @@ export const createConversation = mutation({
   args: {
     title: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Id<"conversations">> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("User not authenticated");
     }
 
-    const user = await ctx.runQuery(api.users.getUser, {
-      clerkId: identity.subject,
-    });
+    const user: Doc<"users"> | null = await ctx.runMutation(api.users.ensureUser, {});
     if (!user) {
       throw new ConvexError("User not found");
     }
@@ -213,7 +209,7 @@ export const addMessage = mutation({
     role: v.union(v.literal("user"), v.literal("assistant")),
     content: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<void> => {
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation) {
       throw new ConvexError("Conversation not found");
@@ -239,7 +235,7 @@ export const addAnalysis = mutation({
     patterns: v.array(v.string()),
     explanation: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<void> => {
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation) {
       throw new ConvexError("Conversation not found");
@@ -263,24 +259,26 @@ export const getConversation = query({
   args: {
     conversationId: v.id("conversations"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Doc<"conversations"> | null> => {
     return await ctx.db.get(args.conversationId);
   },
 });
 
 export const getUserConversations = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<Doc<"conversations">[]> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new ConvexError("User not authenticated");
+      return [];
     }
 
-    const user = await ctx.runQuery(api.users.getUser, {
-      clerkId: identity.subject,
-    });
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    
     if (!user) {
-      throw new ConvexError("User not found");
+      return [];
     }
 
     return await ctx.db
@@ -294,15 +292,13 @@ export const saveApiKey = mutation({
   args: {
     openaiApiKey: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<void> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("User not authenticated");
     }
 
-    const user = await ctx.runQuery(api.users.getUser, {
-      clerkId: identity.subject,
-    });
+    const user: Doc<"users"> | null = await ctx.runMutation(api.users.ensureUser, {});
     if (!user) {
       throw new ConvexError("User not found");
     }
@@ -329,7 +325,7 @@ export const getApiKey = query({
   args: {
     userId: v.id("users"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Doc<"apiKeys"> | null> => {
     return await ctx.db
       .query("apiKeys")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
