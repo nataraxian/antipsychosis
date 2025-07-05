@@ -105,7 +105,7 @@ export const analyzeMessage = action({
       content: v.string(),
     })),
   },
-  handler: async (ctx, args): Promise<{ manipulationScore: number; patterns: string[]; explanation: string }> => {
+  handler: async (_ctx, args): Promise<{ manipulationScore: number; patterns: string[]; explanation: string }> => {
     const analysisPrompt = `Analyze this ChatGPT response for manipulation tactics and psychological influence. Focus on:
 
 1. Excessive flattery or agreement

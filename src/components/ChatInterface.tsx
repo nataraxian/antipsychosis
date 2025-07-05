@@ -1,22 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Send, Settings, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  timestamp: number;
-}
-
-interface Analysis {
-  messageIndex: number;
-  manipulationScore: number;
-  patterns: string[];
-  explanation: string;
-  timestamp: number;
-}
 
 export function ChatInterface() {
   const [currentConversation, setCurrentConversation] = useState<Id<"conversations"> | null>(null);
@@ -32,7 +19,7 @@ export function ChatInterface() {
   );
   
   const createConversation = useMutation(api.chat.createConversation);
-  const sendMessage = useMutation(api.chat.sendMessage);
+  const sendMessage = useAction(api.chat.sendMessage);
   const saveApiKey = useMutation(api.chat.saveApiKey);
 
   const scrollToBottom = () => {
