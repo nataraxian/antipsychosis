@@ -1,29 +1,27 @@
 # Claude Code Notes
 
-## Current Feature: Devcontainer Setup
+## Current Feature: Application Initialization - AntiPsychosis App
 
-Setting up devcontainer configuration for the fullstack template with desktop-lite feature for browser access in GitHub Codespaces.
+Building a defensive security tool to detect manipulative/sycophantic AI responses and protect against ChatGPT-induced psychological manipulation.
+
+## App Requirements
+- **Core Function**: Analyze ChatGPT conversations for manipulation tactics
+- **Target Users**: People concerned about AI psychological influence
+- **Key Features**: 
+  - Chat interface OR conversation analysis (pending clarification)
+  - Real-time commentary on manipulation detection
+  - Focus on sycophantic and manipulative response patterns
 
 ## Progress Status
-- ✅ Created `.devcontainer/devcontainer.json` with Ubuntu base image
-- ✅ Configured Node.js feature with pnpm support
-- ✅ Added desktop-lite feature (browser access on port 6080, VNC on 5901)
-- ✅ Included VS Code extensions from `.vscode/extensions.json`
-- ✅ Set up updateContentCommand with tmux, jq, Claude Code, and Playwright Chrome
-- ✅ Moved work to feature branch for testing
+- ✅ **Step 1: Requirements Gathering** - completed (pending interface clarification)
+- 🔄 **Step 2: Setup** - updating project name and removing template instructions
+- ⏳ Step 3: Implementation - pending
 
 ## Commits Made During Session
-- d13bd12: feat: add devcontainer configuration with desktop-lite feature
-- 25f13b3: refactor: use updateContentCommand instead of postCreateCommand
-
-## Configuration Details
-- Base: Ubuntu latest with Node.js feature from devcontainers/features
-- Desktop: noVNC web access (port 6080), VNC (port 5901), password: vscode
-- CLI Tools: tmux (for background sessions), jq (JSON parsing)
-- Browser: Chrome installed via Playwright for testing
-- Extensions: All recommendations from existing .vscode/extensions.json
-- Command: Using updateContentCommand (better for templates than postCreateCommand)
+(none yet - will track initialization commits here)
 
 ## Next Steps
-- Manual testing needed (requires actual devcontainer environment)
-- Ready for additional commit with updateContentCommand change
+- Clarify interface type (real-time chat vs analysis tool)
+- Update package.json with "antipsychosis" name
+- Remove template instructions from CLAUDE.md
+- Plan and implement MVP
