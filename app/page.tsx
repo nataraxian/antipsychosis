@@ -1,66 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Shield,
-  AlertTriangle,
-  Brain,
-  Eye,
-  TrendingUp,
-  MessageSquare,
-  Link,
-  Loader2,
-  Sparkles,
-  ExternalLink,
-  Download,
-} from "lucide-react"
-import { analyzeConversation, extractFromUrl, type AnalysisResult } from "./actions"
+import { Shield, AlertTriangle, Brain, Eye, TrendingUp, MessageSquare, Loader2, Sparkles } from "lucide-react"
+import { analyzeConversation, type AnalysisResult } from "./actions"
 
 export default function SecondThought() {
-  const [chatUrl, setChatUrl] = useState("")
   const [chatInput, setChatInput] = useState("")
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [isExtractingUrl, setIsExtractingUrl] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [fromExtension, setFromExtension] = useState(false)
-
-  // Check if loaded from extension and auto-load conversation
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get("from") === "extension") {
-      setFromExtension(true)
-      loadFromExtension()
-    }
-  }, [])
-
-  const loadFromExtension = async () => {
-    try {
-      // In a real implementation, this would communicate with the extension
-      // For now, we'll simulate loading from extension storage
-      const stored = localStorage.getItem("secondthought_conversation")
-      if (stored) {
-        const data = JSON.parse(stored)
-        setChatInput(data.conversation)
-        localStorage.removeItem("secondthought_conversation") // Clean up
-
-        // Auto-analyze
-        setTimeout(() => {
-          handleAnalyzeText()
-        }, 500)
-      }
-    } catch (error) {
-      console.error("Failed to load from extension:", error)
-    }
-  }
 
   const handleAnalyzeText = async () => {
     if (!chatInput.trim()) return
@@ -79,31 +34,6 @@ export default function SecondThought() {
     }
   }
 
-  const handleAnalyzeUrl = async () => {
-    if (!chatUrl.trim()) return
-
-    setIsExtractingUrl(true)
-    setError(null)
-    setAnalysis(null)
-
-    try {
-      // First extract the conversation from the URL
-      const conversationText = await extractFromUrl(chatUrl.trim())
-
-      // Then analyze the extracted conversation
-      setIsExtractingUrl(false)
-      setIsAnalyzing(true)
-
-      const result = await analyzeConversation(conversationText)
-      setAnalysis(result)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to extract or analyze conversation from URL.")
-    } finally {
-      setIsExtractingUrl(false)
-      setIsAnalyzing(false)
-    }
-  }
-
   const getRiskLevel = (score: number) => {
     if (score >= 70) return { level: "High", color: "bg-red-500", textColor: "text-red-700" }
     if (score >= 40) return { level: "Medium", color: "bg-amber-500", textColor: "text-amber-700" }
@@ -115,8 +45,6 @@ export default function SecondThought() {
     if (score >= 40) return { level: "Medium", color: "bg-amber-500", textColor: "text-amber-700" }
     return { level: "Low", color: "bg-red-500", textColor: "text-red-700" }
   }
-
-  const isProcessing = isAnalyzing || isExtractingUrl
 
   return (
     <div className="min-h-screen bg-white">
@@ -134,112 +62,19 @@ export default function SecondThought() {
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
             <Sparkles className="h-4 w-4" />
-            <span>Powered by Google Gemini with browser extension support</span>
+            <span>Powered by Google Gemini AI</span>
           </div>
         </div>
-
-        {/* Extension Download Banner */}
-        {!fromExtension && (
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-600 rounded-lg">
-                  <Download className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-blue-900">Get the Browser Extension</h3>
-                  <p className="text-blue-700 text-sm">
-                    Install our browser extension to analyze conversations directly from ChatGPT, Claude, and other AI
-                    platforms with one click.
-                  </p>
-                </div>
-                <Button className="bg-blue-600 hover:bg-blue-700">Install Extension</Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Extension Success Banner */}
-        {fromExtension && (
-          <Card className="border-emerald-200 bg-emerald-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-emerald-600 rounded-lg">
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-emerald-900">Conversation Loaded from Extension</h3>
-                  <p className="text-emerald-700 text-sm">
-                    Your conversation has been automatically loaded and is being analyzed for psychological safety
-                    risks.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Input Section */}
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-6">
             <CardTitle className="text-2xl text-slate-900">Analyze Your Conversation</CardTitle>
             <CardDescription className="text-base text-slate-600">
-              Import your AI chat via shareable link or paste the conversation directly
+              Paste your AI conversation below for psychological safety analysis
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* URL Input */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Link className="h-4 w-4 text-slate-500" />
-                <label className="text-sm font-medium text-slate-700">Shareable Chat Link</label>
-              </div>
-              <div className="flex gap-3">
-                <Input
-                  placeholder="https://chatgpt.com/share/... or https://claude.ai/chat/..."
-                  value={chatUrl}
-                  onChange={(e) => setChatUrl(e.target.value)}
-                  className="h-12 text-base flex-1"
-                  disabled={isProcessing}
-                />
-                <Button
-                  onClick={handleAnalyzeUrl}
-                  disabled={!chatUrl.trim() || isProcessing}
-                  className="h-12 px-6 bg-blue-600 hover:bg-blue-700"
-                >
-                  {isExtractingUrl ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Extracting...
-                    </div>
-                  ) : isAnalyzing ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Analyzing...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <ExternalLink className="w-4 h-4" />
-                      Analyze URL
-                    </div>
-                  )}
-                </Button>
-              </div>
-              <p className="text-xs text-slate-500">
-                Limited by CORS restrictions. Use our browser extension for reliable extraction.
-              </p>
-            </div>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-200" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-slate-500">or paste conversation</span>
-              </div>
-            </div>
-
             {/* Text Input */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -251,11 +86,11 @@ export default function SecondThought() {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 className="min-h-32 text-base resize-none"
-                disabled={isProcessing}
+                disabled={isAnalyzing}
               />
               <Button
                 onClick={handleAnalyzeText}
-                disabled={!chatInput.trim() || isProcessing}
+                disabled={!chatInput.trim() || isAnalyzing}
                 className="w-full h-12 text-base bg-slate-900 hover:bg-slate-800"
               >
                 {isAnalyzing ? (

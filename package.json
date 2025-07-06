@@ -11,6 +11,7 @@
   "dependencies": {
     "@ai-sdk/google": "latest",
     "@radix-ui/react-progress": "latest",
+    "@radix-ui/react-tabs": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "ai": "latest",
